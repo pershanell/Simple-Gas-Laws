@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gas Laws Simulator — Cambridge IGCSE Chemistry</title>
+<style>
+  :root{
+    --navy:#16324A;
+    --teal:#2E8F8A;
+    --gold:#D9A441;
+    --bg:#F4F6F7;
+    --panel:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html{font-size:18px;}
+  body{
+    margin:0;
+    font-family:Calibri, 'Segoe UI', Tahoma, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--navy);
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:22px 28px 18px;
+  }
+  header h1{
+    margin:0 0 4px 0;
+    font-size:1.65rem;
+    letter-spacing:0.3px;
+  }
+  header p{
+    margin:0;
+    color:#CBD8E0;
+    font-size:1rem;
+  }
+  nav.tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    background:var(--navy);
+    padding:0 24px 14px;
+  }
+  nav.tabs button{
+    font-family:inherit;
+    font-size:0.95rem;
+    font-weight:600;
+    color:#fff;
+    background:rgba(255,255,255,0.08);
+    border:2px solid transparent;
+    border-radius:8px 8px 0 0;
+    padding:10px 16px;
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  nav.tabs button:hover{ background:rgba(255,255,255,0.18); }
+  nav.tabs button.active{
+    background:var(--bg);
+    color:var(--navy);
+    border-color:var(--gold);
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:22px 24px 60px;
+  }
+  .tabpanel{ display:none; }
+  .tabpanel.active{ display:block; }
+  .panel-title{
+    font-size:1.3rem;
+    color:var(--navy);
+    margin:0 0 4px;
+  }
+  .panel-sub{
+    color:#4B6273;
+    margin:0 0 16px;
+    font-size:0.98rem;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:820px){ .layout{ grid-template-columns:1fr; } }
+  .card{
+    background:var(--panel);
+    border-radius:10px;
+    box-shadow:0 1px 4px rgba(22,50,74,0.15);
+    padding:16px 18px;
+  }
+  .card h3{
+    margin:0 0 10px;
+    font-size:1.02rem;
+    color:var(--navy);
+    border-bottom:2px solid var(--teal);
+    padding-bottom:6px;
+  }
+  canvas.sim{
+    background:#EAF2F1;
+    border-radius:6px;
+    display:block;
+    margin:0 auto;
+  }
+  canvas.graph{
+    background:#FBFBF9;
+    border-radius:6px;
+    display:block;
+    margin:10px auto 0;
+    border:1px solid #E1E6E8;
+  }
+  .control-row{
+    margin:12px 0;
+  }
+  .control-row label{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.92rem;
+    font-weight:600;
+    margin-bottom:4px;
+    color:var(--navy);
+  }
+  .control-row label span.val{ color:var(--teal); font-weight:700; }
+  input[type=range]{
+    width:100%;
+    accent-color:var(--teal);
+  }
+  input[type=range]:disabled{ opacity:0.55; }
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:10px 0;
+  }
+  .stat{
+    background:#F0F5F5;
+    border-radius:6px;
+    padding:8px 10px;
+  }
+  .stat .label{ font-size:0.78rem; color:#4B6273; }
+  .stat .value{ font-size:1.15rem; font-weight:700; color:var(--navy); }
+  .explanation{
+    background:#FFF7E9;
+    border-left:4px solid var(--gold);
+    border-radius:4px;
+    padding:10px 12px;
+    font-size:0.92rem;
+    line-height:1.4;
+    min-height:70px;
+  }
+  .pressure-meter{
+    height:16px;
+    background:#E1E6E8;
+    border-radius:8px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .pressure-meter-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--teal), var(--gold));
+    width:10%;
+    transition:width 0.15s linear;
+  }
+  button.action{
+    font-family:inherit;
+    font-size:0.9rem;
+    font-weight:700;
+    color:#fff;
+    background:var(--teal);
+    border:none;
+    border-radius:6px;
+    padding:9px 16px;
+    cursor:pointer;
+    margin-right:8px;
+  }
+  button.action:hover{ background:#257670; }
+  button.reset{
+    background:transparent;
+    color:var(--navy);
+    border:2px solid var(--navy);
+  }
+  button.reset:hover{ background:#E9EDEF; }
+  .record-box{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-top:10px;
+  }
+  table.compare{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:0.9rem;
+  }
+  table.compare th, table.compare td{
+    border:1px solid #E1E6E8;
+    padding:6px 8px;
+    text-align:center;
+  }
+  table.compare th{ background:#F0F5F5; color:var(--navy); }
+  .gold-cell{ color:var(--gold); font-weight:700; }
+  .note{
+    font-size:0.82rem;
+    color:#66798A;
+    margin-top:10px;
+    font-style:italic;
+  }
+  .legend{
+    display:flex;
+    gap:16px;
+    font-size:0.82rem;
+    color:#4B6273;
+    margin-top:6px;
+    justify-content:center;
+  }
+  .legend span{ display:flex; align-items:center; gap:5px; }
+  .swatch{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gas Laws Simulator</h1>
+  <p>Kinetic Particle Theory · Cambridge IGCSE Chemistry</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="1">1. Kinetic Theory</button>
+  <button class="tab-btn" data-tab="2">2. Boyle's Law (P–V)</button>
+  <button class="tab-btn" data-tab="3">3. Charles's Law (V–T)</button>
+  <button class="tab-btn" data-tab="4">4. Pressure–Number (P–n)</button>
+  <button class="tab-btn" data-tab="5">5. Combined Gas Law (Extension)</button>
+</nav>
+
+<main>
+
+  <!-- TAB 1: KINETIC THEORY -->
+  <section id="tab1" class="tabpanel active">
+    <h2 class="panel-title">Kinetic Particle Theory of Gases</h2>
+    <p class="panel-sub">Change the temperature and the container size and watch what really happens to the particles.</p>
+    <div class="layout">
+      <div class="card">
+        <h3>Simulation</h3>
+        <canvas id="t1-canvas" class="sim" width="380" height="240"></canvas>
+        <div class="legend">
+          <span><i class="swatch" style="background:#2E8F8A"></i>slow particle</span>
+          <span><i class="swatch" style="background:#D9A441"></i>fast particle</span>
+          <span><i class="swatch" style="background:#D32F2F"></i>extreme pressure (small volume + high temp)</span>
+        </div>
+        <div class="control-row">
+          <label>Temperature <span class="val" id="t1-tempVal">400 K</span></label>
+          <input type="range" id="t1-tempSlider" min="150" max="900" step="10" value="400">
+        </div>
+        <div class="control-row">
+          <label>Container size <span class="val" id="t1-volVal">260</span></label>
+          <input type="range" id="t1-volSlider" min="140" max="360" step="5" value="260">
+        </div>
+        <button class="action reset" id="t1-reset">Reset particles</button>
+      </div>
+      <div class="card">
+        <h3>What's happening</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Average particle speed</div><div class="value" id="t1-speed">–</div></div>
+          <div class="stat"><div class="label">Wall collisions / second</div><div class="value" id="t1-collisions">–</div></div>
+        </div>
+        <div class="label" style="font-size:0.8rem;color:#4B6273;">Relative pressure</div>
+        <div class="pressure-meter"><div class="pressure-meter-fill" id="t1-pbar"></div></div>
+        <div class="explanation" id="t1-explain">Move a slider to see how the particle model explains gas pressure.</div>
+        <p class="note">Particles are modelled as an ideal gas: they collide perfectly elastically as assumed in kinetic theory.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: BOYLE'S LAW -->
+  <section id="tab2" class="tabpanel">
+    <h2 class="panel-title">Boyle's Law — Pressure and Volume</h2>
+    <p class="panel-sub">Temperature is held constant. Drag the piston (volume slider) and watch the pressure respond.</p>
+    <div class="layout">
+      <div class="card">
+        <h3>Simulation</h3>
+        <canvas id="t2-canvas" class="sim" width="380" height="240"></canvas>
+        <div class="control-row">
+          <label>Temperature <span class="val">450 K (constant)</span></label>
+          <input type="range" id="t2-tempSlider" min="150" max="900" step="10" value="450" disabled>
+        </div>
+        <div class="control-row">
+          <label>Volume (piston position) <span class="val" id="t2-volVal">2.50</span></label>
+          <input type="range" id="t2-volSlider" min="120" max="360" step="5" value="250">
+        </div>
+        <div class="control-row">
+          <label>Number of particles <span class="val">40 (constant)</span></label>
+        </div>
+        <button class="action reset" id="t2-reset">Reset particles</button>
+      </div>
+      <div class="card">
+        <h3>P–V relationship</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Volume, V</div><div class="value" id="t2-Vread">–</div></div>
+          <div class="stat"><div class="label">Pressure, P</div><div class="value" id="t2-Pread">–</div></div>
+        </div>
+        <canvas id="t2-graph" class="graph" width="330" height="190"></canvas>
+        <div class="record-box">
+          <button class="action" id="t2-record">Record point 1</button>
+        </div>
+        <table class="compare" id="t2-table" style="display:none;">
+          <tr><th></th><th>Point 1</th><th>Now (point 2)</th></tr>
+          <tr><td>V</td><td id="t2-V1">–</td><td id="t2-V2">–</td></tr>
+          <tr><td>P</td><td id="t2-P1">–</td><td id="t2-P2">–</td></tr>
+          <tr><td>P × V</td><td id="t2-PV1" class="gold-cell">–</td><td id="t2-PV2" class="gold-cell">–</td></tr>
+        </table>
+        <p class="note">Focus on the pattern: as V falls, P rises, and P × V stays roughly constant.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: CHARLES'S LAW -->
+  <section id="tab3" class="tabpanel">
+    <h2 class="panel-title">Charles's Law — Volume and Temperature</h2>
+    <p class="panel-sub">Pressure is held constant by a free-moving piston. Change the temperature and watch the volume respond.</p>
+    <div class="layout">
+      <div class="card">
+        <h3>Simulation</h3>
+        <canvas id="t3-canvas" class="sim" width="460" height="240"></canvas>
+        <div class="control-row">
+          <label>Temperature <span class="val" id="t3-tempVal">400 K</span></label>
+          <input type="range" id="t3-tempSlider" min="50" max="650" step="10" value="400">
+        </div>
+        <div class="control-row">
+          <label>Number of particles <span class="val">40 (constant)</span></label>
+        </div>
+        <p class="note" id="t3-status">Settling to a constant starting pressure — please wait a moment before changing temperature…</p>
+        <button class="action reset" id="t3-reset">Reset particles</button>
+      </div>
+      <div class="card">
+        <h3>V–T relationship</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Volume, V</div><div class="value" id="t3-Vread">–</div></div>
+          <div class="stat"><div class="label">Temperature, T</div><div class="value" id="t3-Tread">–</div></div>
+        </div>
+        <canvas id="t3-graph" class="graph" width="330" height="190"></canvas>
+        <div class="record-box">
+          <button class="action" id="t3-record">Record point 1</button>
+        </div>
+        <table class="compare" id="t3-table" style="display:none;">
+          <tr><th></th><th>Point 1</th><th>Now (point 2)</th></tr>
+          <tr><td>V</td><td id="t3-V1">–</td><td id="t3-V2">–</td></tr>
+          <tr><td>T (K)</td><td id="t3-T1">–</td><td id="t3-T2">–</td></tr>
+          <tr><td>V ÷ T</td><td id="t3-VT1" class="gold-cell">–</td><td id="t3-VT2" class="gold-cell">–</td></tr>
+        </table>
+        <p class="note">The piston moves itself: it settles wherever the internal collision pressure matches the constant external pressure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: PRESSURE vs NUMBER OF PARTICLES -->
+  <section id="tab4" class="tabpanel">
+    <h2 class="panel-title">Pressure and Number of Particles</h2>
+    <p class="panel-sub">Volume and temperature are both held constant. Pump particles in or let them out and watch the pressure respond.</p>
+    <div class="layout">
+      <div class="card">
+        <h3>Simulation</h3>
+        <canvas id="t4-canvas" class="sim" width="380" height="240"></canvas>
+        <div class="control-row">
+          <label>Temperature <span class="val">450 K (constant)</span></label>
+          <input type="range" min="150" max="900" step="10" value="450" disabled>
+        </div>
+        <div class="control-row">
+          <label>Number of particles <span class="val" id="t4-nVal">40</span></label>
+          <input type="range" id="t4-countSlider" min="10" max="100" step="5" value="40">
+        </div>
+        <button class="action reset" id="t4-reset">Reset particles</button>
+      </div>
+      <div class="card">
+        <h3>P–n relationship</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Particle count, n</div><div class="value" id="t4-nread">–</div></div>
+          <div class="stat"><div class="label">Pressure, P</div><div class="value" id="t4-Pread">–</div></div>
+        </div>
+        <canvas id="t4-graph" class="graph" width="330" height="190"></canvas>
+        <div class="record-box">
+          <button class="action" id="t4-record">Record point 1</button>
+        </div>
+        <table class="compare" id="t4-table" style="display:none;">
+          <tr><th></th><th>Point 1</th><th>Now (point 2)</th></tr>
+          <tr><td>n</td><td id="t4-n1">–</td><td id="t4-n2">–</td></tr>
+          <tr><td>P</td><td id="t4-P1">–</td><td id="t4-P2">–</td></tr>
+          <tr><td>P ÷ n</td><td id="t4-Pn1" class="gold-cell">–</td><td id="t4-Pn2" class="gold-cell">–</td></tr>
+        </table>
+        <p class="note">More particles in the same fixed space means more collisions with the walls every second, so the pressure rises in direct proportion to the number of particles.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: EXTENSION - COMBINED GAS LAW -->
+  <section id="tab5" class="tabpanel">
+    <div style="background:var(--gold);color:var(--navy);display:inline-block;padding:3px 12px;border-radius:5px;font-weight:700;font-size:0.82rem;letter-spacing:0.4px;margin-bottom:8px;">EXTENSION — BEYOND THE JH2 SYLLABUS</div>
+    <h2 class="panel-title">Combined Gas Law — Pressure, Volume and Temperature Together</h2>
+    <p class="panel-sub">Number of particles is fixed. Change temperature or volume freely and watch P × V ÷ T stay constant.</p>
+    <div class="layout">
+      <div class="card">
+        <h3>Simulation</h3>
+        <canvas id="t5-canvas" class="sim" width="380" height="240"></canvas>
+        <div class="control-row">
+          <label>Temperature <span class="val" id="t5-tempVal">400 K</span></label>
+          <input type="range" id="t5-tempSlider" min="50" max="900" step="10" value="400">
+        </div>
+        <div class="control-row">
+          <label>Volume (piston position) <span class="val" id="t5-volVal">2.50</span></label>
+          <input type="range" id="t5-volSlider" min="120" max="360" step="5" value="250">
+        </div>
+        <div class="control-row">
+          <label>Number of particles <span class="val">40 (constant)</span></label>
+        </div>
+        <button class="action reset" id="t5-reset">Reset particles</button>
+      </div>
+      <div class="card">
+        <h3>Live readings</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="label">Volume, V</div><div class="value" id="t5-Vread">–</div></div>
+          <div class="stat"><div class="label">Temperature, T</div><div class="value" id="t5-Tread">–</div></div>
+          <div class="stat"><div class="label">Pressure, P</div><div class="value" id="t5-Pread">–</div></div>
+          <div class="stat"><div class="label">P × V ÷ T</div><div class="value" id="t5-ratio">–</div></div>
+        </div>
+        <p class="note">Because the number of particles is fixed here, changing P, V and T together still leaves P × V ÷ T unchanged.</p>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1 1 0; min-width:0;">
+            <h3>P × V ÷ T over time</h3>
+            <canvas id="t5-graph" class="graph" width="230" height="210" style="width:100%;height:auto;"></canvas>
+          </div>
+          <div style="flex:1 1 0; min-width:0;">
+            <h3>Pressure over time</h3>
+            <canvas id="t5-graph2" class="graph" width="230" height="210" style="width:100%;height:auto;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Shared particle-physics engine ----------
+  class GasBox{
+    constructor(canvas, opts){
+      this.canvas = canvas;
+      this.width = opts.width;
+      this.height = opts.height;
+      this.minWidth = opts.minWidth || 100;
+      this.maxWidth = opts.maxWidth || 400;
+      this.temperature = opts.temperature;
+      this.wallMeasure = opts.wallMeasure || 'right'; // 'right' or 'all'
+      this.particleRadius = 4;
+      this.mass = 1;
+      this.pressureWindow = 1500; // ms
+      this.impulseLog = [];
+      this.smoothedP = null;
+      this.particles = [];
+      for(let i=0;i<opts.particleCount;i++) this.addParticle();
+    }
+    speedScale(T){ return Math.sqrt(Math.max(T,1)/300) * 120; } // px/s at 300K reference
+    addParticle(){
+      const r = this.particleRadius;
+      const x = r + Math.random()*(this.width-2*r);
+      const y = r + Math.random()*(this.height-2*r);
+      const speed = this.speedScale(this.temperature) * (0.5+Math.random());
+      const angle = Math.random()*Math.PI*2;
+      this.particles.push({x,y,vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed});
+    }
+    setParticleCount(target){
+      while(this.particles.length < target) this.addParticle();
+      while(this.particles.length > target) this.particles.pop();
+    }
+    setTemperature(T){
+      const oldScale = this.speedScale(this.temperature);
+      const newScale = this.speedScale(T);
+      const ratio = newScale / oldScale;
+      for(const p of this.particles){ p.vx *= ratio; p.vy *= ratio; }
+      this.temperature = T;
+    }
+    setWidth(newWidth){
+      newWidth = Math.max(this.minWidth, Math.min(this.maxWidth, newWidth));
+      this.width = newWidth;
+      const r = this.particleRadius;
+      for(const p of this.particles){
+        if(p.x > this.width - r) p.x = this.width - r;
+        if(p.x < r) p.x = r;
+      }
+    }
+    logImpulse(wall, impulse, now){
+      if(this.wallMeasure === 'all' || this.wallMeasure === wall){
+        this.impulseLog.push({t:now, impulse});
+      }
+    }
+    resolveParticleCollisions(){
+      const r = this.particleRadius;
+      const minDist = 2*r;
+      const n = this.particles.length;
+      for(let i=0;i<n;i++){
+        const a = this.particles[i];
+        for(let j=i+1;j<n;j++){
+          const b = this.particles[j];
+          const dx = b.x-a.x, dy = b.y-a.y;
+          const dist = Math.hypot(dx,dy);
+          if(dist>0 && dist<minDist){
+            const nx = dx/dist, ny = dy/dist;
+            // separate overlapping particles so they don't sink into each other
+            const overlap = (minDist-dist)/2;
+            a.x -= nx*overlap; a.y -= ny*overlap;
+            b.x += nx*overlap; b.y += ny*overlap;
+            // equal-mass elastic collision: exchange velocity components along the line of centres
+            const rel = (a.vx-b.vx)*nx + (a.vy-b.vy)*ny;
+            if(rel>0){
+              a.vx -= rel*nx; a.vy -= rel*ny;
+              b.vx += rel*nx; b.vy += rel*ny;
+            }
+          }
+        }
+      }
+    }
+    step(dt, now){
+      const r = this.particleRadius;
+      for(const p of this.particles){
+        p.x += p.vx*dt;
+        p.y += p.vy*dt;
+        if(p.x - r < 0){ p.x = r; p.vx = -p.vx; this.logImpulse('left', Math.abs(p.vx)*2*this.mass, now); if(this.onWallHit) this.onWallHit(p.x,p.y,now); }
+        if(p.x + r > this.width){ p.x = this.width - r; p.vx = -p.vx; this.logImpulse('right', Math.abs(p.vx)*2*this.mass, now); if(this.onWallHit) this.onWallHit(p.x,p.y,now); }
+        if(p.y - r < 0){ p.y = r; p.vy = -p.vy; this.logImpulse('top', Math.abs(p.vy)*2*this.mass, now); if(this.onWallHit) this.onWallHit(p.x,p.y,now); }
+        if(p.y + r > this.height){ p.y = this.height - r; p.vy = -p.vy; this.logImpulse('bottom', Math.abs(p.vy)*2*this.mass, now); if(this.onWallHit) this.onWallHit(p.x,p.y,now); }
+      }
+      this.resolveParticleCollisions();
+      const cutoff = now - this.pressureWindow;
+      while(this.impulseLog.length && this.impulseLog[0].t < cutoff) this.impulseLog.shift();
+      const raw = this.measurePressure();
+      this.smoothedP = (this.smoothedP === null) ? raw : (this.smoothedP*0.9 + raw*0.1);
+      this.lastDt = dt;
+    }
+    measurePressure(){
+      const windowSec = this.pressureWindow/1000;
+      let sum = 0;
+      for(const e of this.impulseLog) sum += e.impulse;
+      const wallLength = (this.wallMeasure === 'all') ? 2*(this.width+this.height) : this.height;
+      if(wallLength<=0) return 0;
+      return sum/(windowSec*wallLength);
+    }
+    avgSpeed(){
+      if(!this.particles.length) return 0;
+      let s=0;
+      for(const p of this.particles) s += Math.hypot(p.vx,p.vy);
+      return s/this.particles.length;
+    }
+    collisionsPerSec(){
+      return this.impulseLog.length / (this.pressureWindow/1000);
+    }
+  }
+
+  // ---------- Drawing helpers ----------
+  const RED = [211,47,47];
+  function speedColorArr(v){
+    const t = Math.max(0, Math.min(1, (v-30)/270));
+    return [
+      Math.round(46 + (217-46)*t),
+      Math.round(143 + (164-143)*t),
+      Math.round(138 + (65-138)*t)
+    ];
+  }
+  function mixArr(a,b,t){
+    return [
+      Math.round(a[0] + (b[0]-a[0])*t),
+      Math.round(a[1] + (b[1]-a[1])*t),
+      Math.round(a[2] + (b[2]-a[2])*t)
+    ];
+  }
+
+  function drawBox(canvas, box, opts){
+    opts = opts || {};
+    const extreme = opts.extreme || 0;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const originX = Math.round((canvas.width - box.maxWidth)/2);
+    const originY = Math.round((canvas.height - box.height)/2);
+    // full extent guide (max width) very light
+    ctx.strokeStyle = '#D5E0E2';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(originX, originY, box.maxWidth, box.height);
+    // active box
+    ctx.strokeStyle = '#16324A';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(originX, originY, box.width, box.height);
+    // particles
+    for(const p of box.particles){
+      const speed = Math.hypot(p.vx,p.vy);
+      let col = speedColorArr(speed);
+      if(extreme > 0) col = mixArr(col, RED, extreme);
+      ctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+      ctx.beginPath();
+      ctx.arc(originX+p.x, originY+p.y, box.particleRadius, 0, Math.PI*2);
+      ctx.fill();
+    }
+    if(opts.piston){
+      ctx.fillStyle = '#D9A441';
+      ctx.fillRect(originX+box.width-3, originY-6, 6, box.height+12);
+    }
+    if(opts.flashes && opts.flashes.length){
+      const nowTs = performance.now();
+      const dur = 200;
+      for(const f of opts.flashes){
+        const age = nowTs - f.t;
+        if(age<0 || age>dur) continue;
+        const alpha = 1 - (age/dur);
+        const radius = box.particleRadius + 7*(age/dur);
+        ctx.beginPath();
+        ctx.arc(originX+f.x, originY+f.y, radius, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(217,164,65,${alpha.toFixed(2)})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+    return {originX, originY};
+  }
+
+  function niceMax(trail, key, fallback){
+    if(!trail.length) return fallback;
+    let m = fallback;
+    for(const p of trail) if(p[key] > m) m = p[key];
+    return m*1.25;
+  }
+
+  function drawGraph(canvas, trail, opts){
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const marginL = 38, marginB = 22, marginT = 8, marginR = 10;
+    const xMin = (opts.windowX && trail.length) ? trail[0].x : 0;
+    let xMax = niceMax(trail,'x',opts.xFallback);
+    if(opts.windowX && xMax <= xMin) xMax = xMin + (opts.xFallback||1);
+    const yMax = niceMax(trail,'y',opts.yFallback);
+    function mapX(x){ return marginL + ((x-xMin)/(xMax-xMin))*(W-marginL-marginR); }
+    function mapY(y){ return (H-marginB) - (y/yMax)*(H-marginB-marginT); }
+    ctx.strokeStyle = '#16324A';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(marginL, H-marginB); ctx.lineTo(W-marginR, H-marginB);
+    ctx.moveTo(marginL, H-marginB); ctx.lineTo(marginL, marginT);
+    ctx.stroke();
+    ctx.fillStyle = '#16324A';
+    ctx.font = '11px Calibri, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(opts.xLabel, (marginL+W-marginR)/2, H-6);
+    ctx.save();
+    ctx.translate(12, (marginT+H-marginB)/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText(opts.yLabel, 0, 0);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    if(trail.length > 1){
+      ctx.strokeStyle = '#2E8F8A';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      trail.forEach((p,i)=>{
+        const cx = mapX(p.x), cy = mapY(p.y);
+        if(i===0) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+      });
+      ctx.stroke();
+    }
+    if(trail.length){
+      const last = trail[trail.length-1];
+      ctx.fillStyle = '#16324A';
+      ctx.beginPath();
+      ctx.arc(mapX(last.x), mapY(last.y), 4, 0, Math.PI*2);
+      ctx.fill();
+    }
+    if(opts.recorded){
+      ctx.fillStyle = '#D9A441';
+      ctx.strokeStyle = '#16324A';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(mapX(opts.recorded.x), mapY(opts.recorded.y), 6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
+  // Like drawGraph, but the y-axis continuously recentres on the latest
+  // reading so a quantity that's supposed to stay constant always shows up
+  // near the middle of the axis, however its absolute value drifts.
+  function drawGraphCentered(canvas, trail, opts){
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const marginL = 38, marginB = 22, marginT = 8, marginR = 10;
+    const xMin = (opts.windowX && trail.length) ? trail[0].x : 0;
+    let xMax = niceMax(trail, 'x', opts.xFallback || 20);
+    if(opts.windowX && xMax <= xMin) xMax = xMin + (opts.xFallback||20);
+    const current = trail.length ? trail[trail.length-1].y : (opts.fallbackCenter!==undefined ? opts.fallbackCenter : 1);
+    const spread = Math.max(Math.abs(current)*0.6, opts.minSpread!==undefined ? opts.minSpread : 0.5);
+    const yMin = current - spread, yMax = current + spread;
+    function mapX(x){ return marginL + ((x-xMin)/(xMax-xMin))*(W-marginL-marginR); }
+    function mapY(y){ return (H-marginB) - ((y-yMin)/(yMax-yMin))*(H-marginB-marginT); }
+    ctx.strokeStyle = '#16324A';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(marginL, H-marginB); ctx.lineTo(W-marginR, H-marginB);
+    ctx.moveTo(marginL, H-marginB); ctx.lineTo(marginL, marginT);
+    ctx.stroke();
+    ctx.fillStyle = '#16324A';
+    ctx.font = '11px Calibri, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(opts.xLabel, (marginL+W-marginR)/2, H-6);
+    ctx.save();
+    ctx.translate(12, (marginT+H-marginB)/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText(opts.yLabel, 0, 0);
+    ctx.restore();
+    ctx.textAlign = 'left';
+    // dashed midline: the current reading should always sit on/near this line
+    ctx.strokeStyle = '#D5E0E2';
+    ctx.setLineDash([4,3]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(marginL, (marginT+H-marginB)/2);
+    ctx.lineTo(W-marginR, (marginT+H-marginB)/2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if(trail.length > 1){
+      ctx.strokeStyle = '#2E8F8A';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      trail.forEach((p,i)=>{
+        const cx = mapX(p.x), cy = mapY(Math.max(yMin, Math.min(yMax, p.y)));
+        if(i===0) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+      });
+      ctx.stroke();
+    }
+    if(trail.length){
+      const last = trail[trail.length-1];
+      ctx.fillStyle = '#D9A441';
+      ctx.beginPath();
+      ctx.arc(mapX(last.x), mapY(last.y), 4, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function pushTrail(box, x, y, minIntervalMs, now){
+    if(box._lastSample===undefined) box._lastSample = 0;
+    if(!box._trail) box._trail = [];
+    if(now - box._lastSample > minIntervalMs){
+      box._trail.push({x,y});
+      if(box._trail.length > 160) box._trail.shift();
+      box._lastSample = now;
+    }
+    return box._trail;
+  }
+
+  // Returns a copy of trail where each y-value is the average of itself and
+  // up to (window-1) preceding points — smooths out short-term oscillation
+  // without changing the underlying stored readings.
+  function movingAverageTrail(trail, window){
+    const out = [];
+    for(let i=0;i<trail.length;i++){
+      const start = Math.max(0, i-window+1);
+      let sum = 0, count = 0;
+      for(let j=start;j<=i;j++){ sum += trail[j].y; count++; }
+      out.push({x: trail[i].x, y: sum/count});
+    }
+    return out;
+  }
+
+  // ---------- Tab 1: Kinetic Theory ----------
+  const t1canvas = document.getElementById('t1-canvas');
+  let box1 = new GasBox(t1canvas, {particleCount:36, temperature:400, width:260, height:200, minWidth:140, maxWidth:360, wallMeasure:'all'});
+  const t1temp = document.getElementById('t1-tempSlider');
+  const t1vol = document.getElementById('t1-volSlider');
+  const t1tempVal = document.getElementById('t1-tempVal');
+  const t1volVal = document.getElementById('t1-volVal');
+  let t1mode = null;
+  t1temp.addEventListener('input', ()=>{ box1.setTemperature(+t1temp.value); t1tempVal.textContent = t1temp.value+' K'; t1mode='temp'; });
+  t1vol.addEventListener('input', ()=>{ box1.setWidth(+t1vol.value); t1volVal.textContent = t1vol.value; t1mode='vol'; });
+  document.getElementById('t1-reset').addEventListener('click', ()=>{
+    box1 = new GasBox(t1canvas, {particleCount:36, temperature:+t1temp.value, width:+t1vol.value, height:200, minWidth:140, maxWidth:360, wallMeasure:'all'});
+  });
+  const TEMP_TEXT = "As temperature increases, particles gain kinetic energy and move faster. They collide with the walls more often and with greater force, so the pressure increases — even though the container size hasn't changed.";
+  const TEMP_TEXT_DOWN = "As temperature decreases, particles have less kinetic energy and move more slowly. They hit the walls less often and less forcefully, so the pressure decreases.";
+  const VOL_TEXT = "As the container gets smaller, particles have less distance to travel before hitting a wall. They collide with the walls more frequently, so the pressure increases — even though the particles' speed hasn't changed.";
+  const VOL_TEXT_UP = "As the container gets bigger, particles travel further between collisions. They hit the walls less often, so the pressure decreases.";
+  const T1_TMIN=150, T1_TMAX=900, T1_VMIN=140, T1_VMAX=360;
+  function render1(now){
+    const tempNorm = (box1.temperature - T1_TMIN)/(T1_TMAX - T1_TMIN);
+    const volNorm = (T1_VMAX - box1.width)/(T1_VMAX - T1_VMIN); // 1 when volume is smallest
+    const combined = (tempNorm + volNorm)/2;
+    const extreme = Math.max(0, Math.min(1, (combined-0.75)/0.25));
+    drawBox(t1canvas, box1, {extreme});
+    document.getElementById('t1-speed').textContent = box1.avgSpeed().toFixed(0)+' units/s';
+    document.getElementById('t1-collisions').textContent = box1.collisionsPerSec().toFixed(1);
+    const pct = Math.max(4, Math.min(100, box1.smoothedP*3));
+    document.getElementById('t1-pbar').style.width = pct+'%';
+    let text = "Move a slider to see how the particle model explains gas pressure.";
+    if(t1mode==='temp') text = (+t1temp.value >= 400) ? TEMP_TEXT : TEMP_TEXT_DOWN;
+    if(t1mode==='vol') text = (+t1vol.value <= 260) ? VOL_TEXT : VOL_TEXT_UP;
+    document.getElementById('t1-explain').textContent = text;
+  }
+
+  // ---------- Tab 2: Boyle's Law ----------
+  const t2canvas = document.getElementById('t2-canvas');
+  const T2_TEMP = 450;
+  let box2 = new GasBox(t2canvas, {particleCount:40, temperature:T2_TEMP, width:250, height:200, minWidth:120, maxWidth:360, wallMeasure:'right'});
+  const t2vol = document.getElementById('t2-volSlider');
+  const t2volVal = document.getElementById('t2-volVal');
+  let t2recorded = null;
+  t2vol.addEventListener('input', ()=>{ box2.setWidth(+t2vol.value); t2volVal.textContent = (+t2vol.value/100).toFixed(2); });
+  document.getElementById('t2-reset').addEventListener('click', ()=>{
+    box2 = new GasBox(t2canvas, {particleCount:40, temperature:T2_TEMP, width:+t2vol.value, height:200, minWidth:120, maxWidth:360, wallMeasure:'right'});
+    t2recorded = null;
+    document.getElementById('t2-table').style.display='none';
+  });
+  document.getElementById('t2-record').addEventListener('click', ()=>{
+    const V = box2.width/100, P = box2.smoothedP;
+    t2recorded = {V, P};
+    document.getElementById('t2-table').style.display='table';
+    document.getElementById('t2-V1').textContent = V.toFixed(2);
+    document.getElementById('t2-P1').textContent = P.toFixed(1);
+    document.getElementById('t2-PV1').textContent = (V*P).toFixed(1);
+  });
+  function render2(now){
+    drawBox(t2canvas, box2, {piston:true});
+    const V = box2.width/100, P = box2.smoothedP;
+    document.getElementById('t2-Vread').textContent = V.toFixed(2);
+    document.getElementById('t2-Pread').textContent = P.toFixed(1);
+    const trail = pushTrail(box2, V, P, 150, now);
+    drawGraph(document.getElementById('t2-graph'), trail, {
+      xLabel:'V (relative units)', yLabel:'P (relative units)',
+      xFallback:4, yFallback:10,
+      recorded: t2recorded
+    });
+    if(t2recorded){
+      document.getElementById('t2-V2').textContent = V.toFixed(2);
+      document.getElementById('t2-P2').textContent = P.toFixed(1);
+      document.getElementById('t2-PV2').textContent = (V*P).toFixed(1);
+    }
+  }
+
+  // ---------- Tab 3: Charles's Law ----------
+  const t3canvas = document.getElementById('t3-canvas');
+  // Calibrated so that at the maximum temperature (650 K) the piston settles
+  // at about 85% of the apparatus's full length (0.85 * maxWidth 400px).
+  // Width is proportional to T at constant pressure, so anchoring one
+  // (T, width) pair anywhere on that line fixes the whole relationship.
+  function t3CalibratedWidth(T){
+    return 0.85 * 400 * (T/650);
+  }
+  let box3 = new GasBox(t3canvas, {particleCount:40, temperature:400, width:t3CalibratedWidth(400), height:200, minWidth:60, maxWidth:400, wallMeasure:'right'});
+  box3.pressureTarget = null;
+  box3.startTime = null;
+  const t3temp = document.getElementById('t3-tempSlider');
+  const t3tempVal = document.getElementById('t3-tempVal');
+  let t3recorded = null;
+  t3temp.addEventListener('input', ()=>{ box3.setTemperature(+t3temp.value); t3tempVal.textContent = t3temp.value+' K'; });
+  document.getElementById('t3-reset').addEventListener('click', ()=>{
+    box3 = new GasBox(t3canvas, {particleCount:40, temperature:+t3temp.value, width:t3CalibratedWidth(+t3temp.value), height:200, minWidth:60, maxWidth:400, wallMeasure:'right'});
+    box3.pressureTarget = null;
+    box3.startTime = null;
+    t3recorded = null;
+    document.getElementById('t3-table').style.display='none';
+    document.getElementById('t3-status').style.display='block';
+  });
+  document.getElementById('t3-record').addEventListener('click', ()=>{
+    const V = box3.width/100, T = box3.temperature;
+    t3recorded = {V, T};
+    document.getElementById('t3-table').style.display='table';
+    document.getElementById('t3-V1').textContent = V.toFixed(2);
+    document.getElementById('t3-T1').textContent = T.toFixed(0);
+    document.getElementById('t3-VT1').textContent = (V/T).toFixed(4);
+  });
+  function pistonControl(box, now){
+    if(box.pressureTarget === null){
+      if(box.startTime === null) box.startTime = now;
+      if(now - box.startTime > 2000){
+        box.pressureTarget = box.smoothedP;
+        document.getElementById('t3-status').style.display = 'none';
+      }
+      return;
+    }
+    if(box.pistonVelocity === undefined) box.pistonVelocity = 0;
+    const dt = box.lastDt || 0.016;
+    const error = box.smoothedP - box.pressureTarget;
+    // Damped spring: the piston is "pulled" toward equilibrium by the pressure
+    // error, but a strong damping term (heavier than critical) kills any
+    // overshoot, similar to how a real piston pushing against an external
+    // gas cushion settles smoothly instead of bouncing.
+    const kSpring = 3.5;
+    const damping = 2*Math.sqrt(kSpring)*0.55; // halved again from 1.1
+    box.pistonVelocity += (error*kSpring - damping*box.pistonVelocity) * dt;
+    box.pistonVelocity = Math.max(-90, Math.min(90, box.pistonVelocity));
+    box.setWidth(box.width + box.pistonVelocity*dt);
+    if(box.width <= box.minWidth+0.01 || box.width >= box.maxWidth-0.01){
+      box.pistonVelocity = 0; // stop pushing once the apparatus limit is reached
+    }
+  }
+  function render3(now){
+    pistonControl(box3, now);
+    drawBox(t3canvas, box3, {piston:true});
+    const V = box3.width/100, T = box3.temperature;
+    document.getElementById('t3-Vread').textContent = V.toFixed(2);
+    document.getElementById('t3-Tread').textContent = T.toFixed(0)+' K';
+    const trail = pushTrail(box3, T, V, 150, now);
+    drawGraph(document.getElementById('t3-graph'), trail, {
+      xLabel:'T (K)', yLabel:'V (relative units)',
+      xFallback:1000, yFallback:4,
+      recorded: t3recorded ? {x:t3recorded.T, y:t3recorded.V} : null
+    });
+    if(t3recorded){
+      document.getElementById('t3-V2').textContent = V.toFixed(2);
+      document.getElementById('t3-T2').textContent = T.toFixed(0);
+      document.getElementById('t3-VT2').textContent = (V/T).toFixed(4);
+    }
+  }
+
+  // ---------- Tab 4: Pressure vs Number of particles ----------
+  const t4canvas = document.getElementById('t4-canvas');
+  const T4_TEMP = 450;
+  let t4AudioCtx = null;
+  let t4LastTick = 0;
+  function t4PlayTick(now){
+    if(now - t4LastTick < 35) return; // throttle so rapid collisions don't overlap into noise
+    t4LastTick = now;
+    try{
+      if(!t4AudioCtx) t4AudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      if(t4AudioCtx.state==='suspended') t4AudioCtx.resume();
+      const osc = t4AudioCtx.createOscillator();
+      const gain = t4AudioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 1800;
+      gain.gain.setValueAtTime(0.05, t4AudioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t4AudioCtx.currentTime+0.04);
+      osc.connect(gain); gain.connect(t4AudioCtx.destination);
+      osc.start();
+      osc.stop(t4AudioCtx.currentTime+0.05);
+    }catch(e){ /* audio unavailable — fail silently */ }
+  }
+  function t4AttachFeedback(box){
+    box.flashes = [];
+    box.onWallHit = function(x,y,now){
+      box.flashes.push({x,y,t:now});
+      if(box.flashes.length>60) box.flashes.shift();
+      t4PlayTick(now);
+    };
+  }
+  let box4 = new GasBox(t4canvas, {particleCount:40, temperature:T4_TEMP, width:300, height:200, minWidth:300, maxWidth:300, wallMeasure:'all'});
+  t4AttachFeedback(box4);
+  const t4count = document.getElementById('t4-countSlider');
+  const t4nVal = document.getElementById('t4-nVal');
+  let t4recorded = null;
+  t4count.addEventListener('input', ()=>{ box4.setParticleCount(+t4count.value); t4nVal.textContent = t4count.value; });
+  document.getElementById('t4-reset').addEventListener('click', ()=>{
+    box4 = new GasBox(t4canvas, {particleCount:+t4count.value, temperature:T4_TEMP, width:300, height:200, minWidth:300, maxWidth:300, wallMeasure:'all'});
+    t4AttachFeedback(box4);
+    t4recorded = null;
+    document.getElementById('t4-table').style.display='none';
+  });
+  document.getElementById('t4-record').addEventListener('click', ()=>{
+    const n = box4.particles.length, P = box4.smoothedP;
+    t4recorded = {n, P};
+    document.getElementById('t4-table').style.display='table';
+    document.getElementById('t4-n1').textContent = n;
+    document.getElementById('t4-P1').textContent = P.toFixed(1);
+    document.getElementById('t4-Pn1').textContent = (P/n).toFixed(3);
+  });
+  function render4(now){
+    if(box4.flashes) box4.flashes = box4.flashes.filter(f => now-f.t < 200);
+    drawBox(t4canvas, box4, {flashes: box4.flashes});
+    const n = box4.particles.length, P = box4.smoothedP;
+    document.getElementById('t4-nread').textContent = n;
+    document.getElementById('t4-Pread').textContent = P.toFixed(1);
+    const trail = pushTrail(box4, n, P, 150, now);
+    drawGraph(document.getElementById('t4-graph'), trail, {
+      xLabel:'n (number of particles)', yLabel:'P (relative units)',
+      xFallback:100, yFallback:10,
+      recorded: t4recorded ? {x:t4recorded.n, y:t4recorded.P} : null
+    });
+    if(t4recorded){
+      document.getElementById('t4-n2').textContent = n;
+      document.getElementById('t4-P2').textContent = P.toFixed(1);
+      document.getElementById('t4-Pn2').textContent = (P/n).toFixed(3);
+    }
+  }
+
+  // ---------- Tab 5: Extension - Combined Gas Law ----------
+  const t5canvas = document.getElementById('t5-canvas');
+  let box5 = new GasBox(t5canvas, {particleCount:40, temperature:400, width:250, height:200, minWidth:120, maxWidth:360, wallMeasure:'right'});
+  const t5temp = document.getElementById('t5-tempSlider');
+  const t5vol = document.getElementById('t5-volSlider');
+  const t5tempVal = document.getElementById('t5-tempVal');
+  const t5volVal = document.getElementById('t5-volVal');
+  const t5RatioStore = {};
+  const t5PressureStore = {};
+  t5temp.addEventListener('input', ()=>{ box5.setTemperature(+t5temp.value); t5tempVal.textContent = t5temp.value+' K'; });
+  t5vol.addEventListener('input', ()=>{ box5.setWidth(+t5vol.value); t5volVal.textContent = (+t5vol.value/100).toFixed(2); });
+  document.getElementById('t5-reset').addEventListener('click', ()=>{
+    box5 = new GasBox(t5canvas, {particleCount:40, temperature:+t5temp.value, width:+t5vol.value, height:200, minWidth:120, maxWidth:360, wallMeasure:'right'});
+    t5RatioStore._trail = [];
+    t5PressureStore._trail = [];
+  });
+  function render5(now){
+    drawBox(t5canvas, box5, {piston:true});
+    const V = box5.width/100, T = box5.temperature, P = box5.smoothedP;
+    const ratio = (P*V)/T;
+    document.getElementById('t5-Vread').textContent = V.toFixed(2);
+    document.getElementById('t5-Tread').textContent = T.toFixed(0)+' K';
+    document.getElementById('t5-Pread').textContent = P.toFixed(1);
+    document.getElementById('t5-ratio').textContent = ratio.toFixed(4);
+    box5._sampleIndex = (box5._sampleIndex||0) + 1;
+    const ratioTrail = movingAverageTrail(pushTrail(t5RatioStore, box5._sampleIndex, ratio, 150, now), 5);
+    const pressureTrail = movingAverageTrail(pushTrail(t5PressureStore, box5._sampleIndex, P, 150, now), 5);
+    drawGraphCentered(document.getElementById('t5-graph'), ratioTrail, {
+      xLabel:'time (samples)', yLabel:'P × V ÷ T',
+      xFallback:20, fallbackCenter:1, windowX:true
+    });
+    drawGraph(document.getElementById('t5-graph2'), pressureTrail, {
+      xLabel:'time (samples)', yLabel:'P (relative units)',
+      xFallback:20, yFallback:10, windowX:true
+    });
+  }
+
+  // ---------- Tab switching ----------
+  let activeTab = 1;
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = +btn.dataset.tab;
+      document.getElementById('tab'+activeTab).classList.add('active');
+    });
+  });
+
+  // ---------- Main loop ----------
+  let last = performance.now();
+  function loop(t){
+    const dt = Math.min((t-last)/1000, 0.05);
+    last = t;
+    if(activeTab===1){ box1.step(dt,t); render1(t); }
+    else if(activeTab===2){ box2.step(dt,t); render2(t); }
+    else if(activeTab===3){ box3.step(dt,t); render3(t); }
+    else if(activeTab===4){ box4.step(dt,t); render4(t); }
+    else if(activeTab===5){ box5.step(dt,t); render5(t); }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
